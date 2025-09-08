@@ -1,0 +1,173 @@
+vector 容器，用来存储数据用的只能存储同一种数据类型，能自动扩容，属于STL的一部分
+1.在使用前先引入vector头文件,定义为 std::vector<数据类型>容器名,初始化方式可以与数组的初始化列表一样，其访问也可以通过索引下标
+迭代器类型 ：
+非 const 迭代器	vector<T>::iterator 变量名	读写非 const 容器的元素
+const 迭代器	vector<T>::const_iterator 变量名	只读元素（适用于 const 容器或只读场景）
+
+2.初始化方式：
+// 方式1：默认初始化（空vector）
+vector<int> v1;  
+
+// 方式2：指定大小和初始值（10个元素，每个都是0）
+vector<int> v2(10, 0);  
+
+// 方式3：用已有vector初始化（复制v2的所有元素）
+vector<int> v3(v2);  
+
+// 方式4：列表初始化（C++11及以上，直接写元素）
+vector<int> v4 = {1, 2, 3, 4, 5};  
+
+// 方式5：用迭代器范围初始化（复制v4中[begin, end)的元素）
+vector<int> v5(v4.begin(), v4.end());  
+6.assign:
+用 n个相同的值 填充 vector    assign(size_type n, const T& value);
+用 迭代器范围 的元素填充 vector   assign(begin(),end());
+3.元素访问：
+vector<int> v = {10, 20, 30, 40};
+
+// 方法1：[]访问（不检查越界，速度快）
+cout << v[0] << endl;  // 输出10
+cout << v[3] << endl;  // 输出40
+
+// 方法2：at()访问（检查越界，越界会抛异常，更安全）
+cout << v.at(1) << endl;  // 输出20
+// v.at(10)  // 越界，运行时会报错
+
+// 方法3：访问首尾元素
+cout << "第一个元素：" << v.front() << endl;  // 10
+cout << "最后一个元素：" << v.back() << endl;  // 40
+
+// 方法4：数据指针（获取底层数组的首地址，用于兼容C风格函数）
+int* p = v.data();  
+cout << p[2] << endl;  // 输出30（等价于v[2]）
+4.操作：
+vector<int> v;
+
+// （1）尾部插入元素（最常用）
+v.push_back(1);  // v: [1]
+v.push_back(2);  // v: [1, 2]
+
+// （2）尾部删除元素
+v.pop_back();    // v: [1]
+
+// （3）任意位置插入（迭代器位置）
+v.insert(v.begin(), 0);  // 在开头插入0 → v: [0, 1]
+v.insert(v.end(), 2, 3); // 在末尾插入2个3 → v: [0, 1, 3, 3]
+
+// （4）任意位置删除（迭代器位置）
+v.erase(v.begin() + 1);  // 删除第2个元素（1）→ v: [0, 3, 3]
+
+// （5）清空所有元素（size变为0，capacity不变）
+v.clear();  // v: []
+5.容量管理：
+vector有两个关键概念：
+size()：当前元素个数
+capacity()：当前可容纳的最大元素个数（预分配的内存）
+当size() == capacity()时，再插入元素会触发扩容（通常是翻倍扩容，复制旧数据到新内存，效率低）。
+可以提前预留容量避免频繁扩容：
+vector<int> v;
+
+// 初始状态：size=0，capacity=0
+cout << "size: " << v.size() << ", capacity: " << v.capacity() << endl;
+
+// 预留容量（不会改变size，只分配内存）
+v.reserve(10);  // capacity变为10，size仍为0
+
+// 插入元素（此时不会频繁扩容）
+for (int i = 0; i < 5; i++) {
+    v.push_back(i);
+}
+// 此时size=5，capacity=10（未达上限，无扩容）
+
+// 调整size（若size变大，新增元素用默认值填充）
+v.resize(8);  // size=8，元素为[0,1,2,3,4,0,0,0]
+6.vector 与迭代器：遍历和算法协作：
+vector<int> v = {1, 2, 3, 4};
+
+// （1）普通迭代器（可读可写）
+vector<int>::iterator it;  
+for (it = v.begin(); it != v.end(); it++) {
+    *it *= 2;  // 修改元素（每个元素乘2）
+}  // 结果：[2,4,6,8]
+
+// （2）const迭代器（只读，用于const vector）
+vector<int>::const_iterator cit;  
+for (cit = v.begin(); cit != v.end(); cit++) {
+    cout << *cit << " ";  // 只能读，不能修改
+}
+
+// （3）反向迭代器（从尾部遍历）
+vector<int>::reverse_iterator rit;  
+for (rit = v.rbegin(); rit != v.rend(); rit++) {
+    cout << *rit << " ";  // 输出8 6 4 2（反向遍历）
+}
+反向迭代器的指向：rbegin()对应容器最后一个元素，rend()对应第一个元素之前的位置，范围[rbegin(), rend())包含所有元素（反向顺序）。
+
+7.配合STL算法：要记得引入算法文件库
+#include <algorithm>  // 算法头文件
+
+vector<int> v = {3, 1, 4, 1, 5};
+
+// （1）排序（默认升序）传入迭代器
+sort(v.begin(), v.end());  // 结果：[1,1,3,4,5]
+
+// （2）查找元素（返回迭代器）
+auto it = find(v.begin(), v.end(), 3);  
+if (it != v.end()) {
+    cout << "找到元素：" << *it << "，位置：" << it - v.begin() << endl;
+}
+
+// （3）统计元素出现次数
+int count_1 = count(v.begin(), v.end(), 1);  
+cout << "1出现的次数：" << count_1 << endl;  // 输出2
+
+// （4）遍历并处理元素（for_each+lambda表达式），参数三为函数名，源码为每找到一个元素，就传入参数，调用函数
+for_each(v.begin(), v.end(), [](int x) {
+    cout << x * 2 << " ";  // 输出每个元素的2倍：2 2 6 8 10
+});
+也可以不用lambda函数，只需自定义一个函数，传入函数名即可
+
+swap方法：
+swap 用于交换两个同类型 vector 的所有元素和内存资源，交换后：
+两个容器的元素完全互换；
+各自的 size 和 capacity 也会互换（因为内存资源被交换了）；
+交换过程中不会复制元素，仅交换内部管理的指针，效率远高于手动逐个复制元素，仅交换同一数据类型的vector
+-----------------
+使用swap可以释放过多容量的vector,使用resize和clear方法时，vector里的容量并不会改变，这样会照成内存让非，
+解决方式 vector<type>().swap(v);
+
+实战，来源于豆包
+#include <iostream>
+#include <vector>
+#include <algorithm>  // 包含sort等算法
+#include <numeric>    // 包含accumulate（求和）
+
+int main() {
+    // 1. 存储5名学生的成绩
+    vector<int> scores = {85, 92, 78, 90, 88};
+
+    // 2. 输出所有成绩
+    cout << "学生成绩：";
+    for (int s : scores) {  // 范围for循环（C++11）
+        cout << s << " ";
+    }
+    cout << endl;
+
+    // 3. 计算平均分（用accumulate求和）
+    int sum = accumulate(scores.begin(), scores.end(), 0);  // 0是初始值
+    double avg = sum / (double)scores.size();
+    cout << "平均分：" << avg << endl;  // 输出86.6
+
+    // 4. 排序（从高到低）
+    sort(scores.rbegin(), scores.rend());  // 用反向迭代器实现降序
+    cout << "排序后（从高到低）：";
+    for (int s : scores) {
+        cout << s << " ";  // 输出92 90 88 85 78
+    }
+    cout << endl;
+
+    // 5. 查找最高分（第一个元素）
+    cout << "最高分：" << scores.front() << endl;  // 输出92
+
+    return 0;
+}

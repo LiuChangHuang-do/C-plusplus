@@ -1,0 +1,19 @@
+有一个题，要求输入一个整数，返回数组里其连续和为这个整数的最小长度
+思路：本质上也是双指针的一种，我们可以定义两个指针，指向数组首端，一个指针用于遍历全部元素（称为右指针），左指针和右指针构成的区间就称为滑动窗口，我们通过取窗口里的总和与目标输入值的比较对左指针进行移动操作，这就形成了一种滑动窗口。我们要保持右边不动，判断当前区间和大于等于目标输入值的话，我们就移动左边窗口，更新新的区间值和长度，从新判断，不成立的话左边指针不动，右边指针往后移动。这个其实有个误区，不能用判断语句进行移动操作，因为右指针要在左指针移动的过程中保持不动，左指针是可能不断移动的（连续），我们用判断语句的话，左指针只动了一次，右指针也一起动。上代码。
+int find_li(int *arr,int size,int s){
+    auto left = 0;
+    auto sum = 0;
+    auto min_len = size + 1;
+   for(int right = 0; right < size; right++){
+   	sum += arr[right];
+     while(sum >= s){
+     	current_len = (right - left) + 1;
+     	if(current_len < min_len){
+     	   min_len = current_len;
+     	}
+   	sum -= arr[left];
+   	left++;
+   	}
+   }
+   return (min_len == size + 1) ? 0 : min_len;
+}

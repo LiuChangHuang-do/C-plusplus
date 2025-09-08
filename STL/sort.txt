@@ -1,0 +1,67 @@
+sort()是一个很常用的排序函数，是algorithim文件里的一种算法，这个函数主要用于序列容器里元素的排序，默认是升序，通常形式是sort(first,end,compare)
+first和end可以是迭代器，也可以是是指针，如果用于数组，我们的frist直接就是数组首地址，但是end是要数组末尾地址的下一位，第三个比较函数默认就是升序的，我们可以不用传入
+比较函数我们要写的话，一般直接用lambda函数，参数列表就是两个迭代器传入的元素，根据返回值确定两个元素哪个排在前哪个排在后。
+
+默认行为与自定义比较
+
+std::vector<int> numbers = {3, 1, 4, 1, 5};
+std::sort(numbers.begin(), numbers.end());
+// 结果: {1, 1, 3, 4, 5}
+默认情况下，std::sort 使用 operator< 进行比较，所以结果是升序排列。
+
+自定义比较（降序）
+std::vector<int> numbers = {3, 1, 4, 1, 5};
+std::sort(numbers.begin(), numbers.end(), [](int a, int b) {
+    return a > b; // 如果a大于b，a应该排在b前面 -> 降序
+});
+// 结果: {5, 4, 3, 1, 1}
+
+STL里sort函数的内部逻辑（简化）
+template<typename RandomIt, typename Compare>
+void simple_sort(RandomIt first, RandomIt last, Compare comp) {
+    for (auto i = first; i != last; ++i) {
+        for (auto j = i + 1; j != last; ++j) {
+            // 关键部分：使用比较函数决定是否交换元素
+            if (comp(*j, *i)) { // 如果j应该在i前面
+                std::swap(*i, *j); // 交换它们
+            }
+        }
+    }
+}
+
+内部更详细的模拟
+
+std::vector<int> vec = {3, 1, 2};
+
+// 调用 sort
+std::sort(vec.begin(), vec.end(), [](int a, int b) {
+    return a < b; // 升序比较
+});
+
+在算法内部，可能会发生类似这样的过程：
+
+// 第一次循环：i 指向第一个元素 (3)
+auto i = vec.begin(); // i -> 3
+auto j = i + 1;       // j -> 1
+
+// 比较: comp(*j, *i) → comp(1, 3)
+// Lambda 函数执行: 1 < 3 → true
+// 因为 1 应该在 3 前面，所以交换
+std::swap(*i, *j); // 现在 vector: {1, 3, 2}
+
+// j 移动到下一个位置
+j = i + 2; // j -> 2
+
+// 比较: comp(*j, *i) → comp(2, 1)
+// Lambda: 2 < 1 → false
+// 不交换
+
+// 第二次循环：i 指向第二个元素 (3)
+++i;       // i -> 3
+j = i + 1; // j -> 2
+
+// 比较: comp(*j, *i) → comp(2, 3)
+// Lambda: 2 < 3 → true
+// 交换
+std::swap(*i, *j); // 现在 vector: {1, 2, 3}
+

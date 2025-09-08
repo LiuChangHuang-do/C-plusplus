@@ -1,0 +1,97 @@
+嵌套容器：容器里的容器，类似于普通二维数组
+// 方式1：初始化3行4列的矩阵，所有元素为0
+vector<vector<int>> matrix1(3, vector<int>(4, 0));  
+// 结构：
+// [0, 0, 0, 0]
+// [0, 0, 0, 0]
+// [0, 0, 0, 0]
+
+// 方式2：列表初始化（C++11及以上），每行元素可不同
+vector<vector<int>> matrix2 = {
+    {1, 2, 3},    // 第0行（3个元素）
+    {4, 5},       // 第1行（2个元素）
+    {6, 7, 8, 9}  // 第2行（4个元素）
+};  // 不规则矩阵，每行长度不同
+（2）动态添加行（常用）
+先创建空的外层 vector，再通过push_back添加内层 vector 作为 “行”：
+vector<vector<int>> matrix;
+
+// 添加第1行（3个元素）
+matrix.push_back({1, 2, 3});  
+
+// 添加第2行（2个元素）
+matrix.push_back(vector<int>{4, 5});  
+
+// 添加空行
+matrix.push_back({});  
+
+嵌套 vector 的元素访问需要两层操作：先访问外层 vector 的 “行”，再访问内层 vector 的 “列”。
+
+vector<vector<int>> matrix = {{1,2,3}, {4,5}, {6}};
+
+// 访问第0行第1列的元素（2）
+cout << matrix[0][1] << endl;  
+
+// 修改第1行第0列的元素（4→100）
+matrix[1][0] = 100;  
+// 此时matrix变为：{{1,2,3}, {100,5}, {6}}
+
+2. at()访问（更安全，会检查越界）
+try {
+    // 访问第2行第0列（6）
+    cout << matrix.at(2).at(0) << endl;  
+    
+    // 越界访问（第0行只有3列，索引2是最后一个）
+    matrix.at(0).at(3);  // 抛异常：out_of_range
+} catch (const out_of_range& e) {
+    cout << "访问越界：" << e.what() << endl;
+}
+
+迭代器遍历（更通用）
+// 外层用vector<vector<int>>::iterator，内层用vector<int>::iterator
+for (vector<vector<int>>::iterator row_it = matrix.begin(); row_it != matrix.end(); row_it++) {
+    // row_it指向一行（vector<int>），*row_it获取当前行
+    for (vector<int>::iterator col_it = row_it->begin(); col_it != row_it->end(); col_it++) {
+        cout << *col_it << " ";
+    }
+    cout << endl;
+}
+
+// 用auto简化迭代器定义（推荐）
+for (auto& row : matrix) {  // row是每行的引用（避免复制）
+    for (int val : row) {   // 遍历当前行的元素
+        cout << val << " ";
+    }
+    cout << endl;
+}
+-----------------------------
+嵌套 vector 与 STL 算法的结合
+#include <algorithm>  // 包含sort
+
+vector<vector<int>> matrix = {{3,1,2}, {5,4}, {6}};
+
+// 遍历每行，对每行元素排序
+for (auto& row : matrix) {  // 注意用引用&，否则排序的是副本
+    sort(row.begin(), row.end());  // 对当前行排序
+}
+// 结果：
+// [1,2,3]
+// [4,5]
+// [6]
+-----------------------
+#include <algorithm>
+
+vector<vector<int>> matrix = {{1,2}, {3,4}, {5}};
+int target = 3;
+bool found = false;
+
+// 遍历每行查找目标
+for (const auto& row : matrix) {
+    auto it = find(row.begin(), row.end(), target);
+    if (it != row.end()) {
+        found = true;
+        break;
+    }
+}
+
+cout << (found ? "找到" : "未找到") << endl;  // 输出：找到

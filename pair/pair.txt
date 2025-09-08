@@ -1,0 +1,12 @@
+pair 是 C++ 标准库中的一个结构体模板，专门用于存储两个关联的数据（可以是不同类型），语法是 pair<类型1, 类型2>。而 map 存储的每个元素本质上都是一个 pair（key 是 pair.first，value 是 pair.second），所以插入 map 时经常会用到 pair,pair 就像一个 “迷你容器”，只能存两个元素，第一个用 first 访问，第二个用 second 访问
+#include <iostream>
+#include <utility>  // 使用pair需要包含这个头文件
+using namespace std;
+int main() {
+    // 定义一个pair：第一个元素是int（101），第二个是string（"张三"）
+    pair<int, string> p(101, "张三");
+    cout << "第一个元素（key）：" << p.first << endl;   // 输出101
+    cout << "第二个元素（value）：" << p.second << endl;  // 输出"张三"
+    return 0;
+}
+map里每个元素都是pair

@@ -1,0 +1,50 @@
+链表：一种线性的数据结构，只不过其内存形式不是连续的，每条链表都是由一个个节点组成，节点里有其存储的数据值还有指向下一个节点的地址，通过指针的这种连接形成了链表
+一：节点的定义，通常如下：
+struct listnode{
+ type data;
+ listnode *next;
+ listnode(type t):data(t),next(nullptr){}
+}
+二：创建节点
+我们定义好了节点之后，创建节点，通常用new的方式创建节点，因为new之后我们如果不需要某个节点了，可以修改链表之后将不需要的节点删除
+auto *n1 = new listnode(a);
+.....
+三：链接节点，构建链表
+创建好节点，通过每个节点里的指针域依次存储链表节点的地址，这样就构建好了链表。
+n1->next = n2;
+n2->next = n3;
+....
+四：遍历节点
+我们发现尾部节点的指针域是不存储链表节点地址的，所以我们可以通过当前指针是否为空循环遍历即可，定义一个指向头部节点的指针，当头指针不为空我们就更新头指针的位置。遍历节点的时候
+不要用头指针，要用临时头指针！！！！
+
+listnode *head = n1;
+while(head != nullptr){
+   std::cout<<"crueent node value is "<<head->value;
+   head = head->next;//错误，我们修改了头指针，应该用临时指针遍历链表！！！！！
+}
+五：节点的删除
+我们要删除某个节点的话，就是将这个节点的上一个节点的指针指向要删除的节点的指针指向的下一个节点，这个只是将链表更新了，还要用delete 将节点删除掉
+void removenode(listnode *node){
+	if(node->next == nullptr)
+	 {
+	   return;
+	 }
+	auto *after_node = node->next;
+	auto aa_node = after_node->next;
+	node->next = aa_node;
+	delete after_node;//这代码是删除当前node之后后的节点
+	
+	
+}
+六：插入节点
+只需将插入的节点里的指针域指向下一个节点，上一个节点的指针域指向这个插入的节点即可
+void insertnode(listnode *p,listnode *n){
+          auto *after_node = p->next;
+          n->next = after_node;
+          p->next = n
+}
+
+尾部插入节点：
+嗯，先判断是否为空链表，我们一般都是在链表头部定义了一个头指针，让其指向链表头部，如果开始的时候头指针为空，那么就代表这个链表为空，那么这个新的节点就是头节点
+否者，我们同样的遍历链表，找到尾部节点，让尾部节点的指针域指向新插入的节点就好了。

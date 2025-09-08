@@ -1,0 +1,171 @@
+map是C++中一种特殊容器，存储的是一对元素，类似于python中的key和value
+一、map 的核心特性
+键值对存储：每个元素是 pair<key_type, value_type> 结构（key 是键，value 是值）。
+key 唯一：不允许重复的 key，插入重复 key 会被忽略（或覆盖，取决于方式）。
+自动排序：默认按 key 的升序排列（可自定义排序规则）。
+动态大小：无需预先指定大小，自动扩容。
+基本用法（头文件与定义）
+使用 map 需要包含头文件 <map>，并指定 key 和 value 的类型：
+map<type,type>map名
+初始化方式：
+// 方式1：列表初始化（C++11及以上）
+map<int, string> m1 = {
+    {1, "apple"},
+    {2, "banana"},
+    {3, "cherry"}
+};  // 自动按key升序排列：1→apple, 2→banana, 3→cherry
+
+// 方式2：复制初始化
+map<int, string> m2(m1);  // m2是m1的副本
+
+2. 插入元素（3 种常用方式）
+map 的 [] 运算符有个特殊规则：当你用 map[key] 访问一个不存在的 key 时，map 会自动插入这个 key，并将对应的 value 初始化为 “默认值”（比如 int 的默认值是 0，string 的默认值是空字符串），同时map[key]++ == map[key] = value(值++)
+map<int, string> m;
+
+// 方式1：用insert()插入pair对象
+m.insert(pair<int, string>(1, "apple"));  // 插入{1, "apple"}
+
+// 方式2：用insert()插入make_pair（更简洁）
+m.insert(make_pair(2, "banana"));  // 插入{2, "banana"}
+emplace	m.emplace(key, value);	同 insert，但更高效（直接在容器内构造元素）
+// 方式3：用[]直接赋值（最常用）
+m[3] = "cherry";  // 插入{3, "cherry"}
+注意：
+若插入的 key 已存在，insert() 会忽略插入（保持原有值）；
+而 [] 会覆盖原有值（先查找，不存在则插入，存在则修改）。
+
+四、元素访问与修改
+
+map<int, string> m = {{1, "apple"}, {2, "banana"}};
+
+// 方式1：[]访问（key不存在时会插入默认值）
+cout << m[1] << endl;  // 输出"apple"
+cout << m[3] << endl;  // key=3不存在，插入{3, ""}（空字符串），输出空
+
+// 方式2：at()访问（key不存在时抛异常，更安全）
+try {
+    cout << m.at(2) << endl;  // 输出"banana"
+    cout << m.at(4) << endl;  // 抛异常：out_of_range
+} catch (const out_of_range& e) {
+    cout << "访问失败：" << e.what() << endl;
+}
+
+// 方式3：迭代器访问（获取key和value），迭代器访问方式很高级
+map<int, string>::iterator it = m.find(1);  // 查找key=1
+if (it != m.end()) {  // 找到时
+    cout << "key: " << it->first << ", value: " << it->second << endl;  // first是key，second是value
+}
+2. 修改元素
+
+map<int, string> m = {{1, "apple"}};
+
+// 用[]修改（直接赋值）
+m[1] = "red apple";  // key=1的值变为"red apple"
+
+// 用迭代器修改
+auto it = m.find(1);
+if (it != m.end()) {
+    it->second = "green apple";  // 通过second修改value
+}
+
+五、遍历 map（迭代器是核心）
+map 没有下标遍历（因为 key 可能不是连续整数），迭代器是主要遍历方式：
+
+map<int, string> m = {{3, "cat"}, {1, "apple"}, {2, "banana"}};  // 会自动按key排序为1,2,3
+
+// 方式1：普通迭代器（可修改value）
+for (map<int, string>::iterator it = m.begin(); it != m.end(); ++it) {
+    cout << it->first << " → " << it->second << endl;
+}
+map 的 find 是成员函数，专门用于根据 key 查找元素，语法和功能是：
+iterator find(const Key& key);  // 参数：要查找的key值
+// 方式2：const迭代器（只读）
+for (map<int, string>::const_iterator cit = m.cbegin(); cit != m.cend(); ++cit) {
+    cout << cit->first << " → " << cit->second << endl;
+}
+
+// 方式3：auto简化（推荐）
+for (auto& pair : m) {  // pair是对{key, value}的引用
+    cout << pair.first << " → " << pair.second << endl;
+}
+
+六、删除元素（erase ()）
+map<int, string> m = {{1, "a"}, {2, "b"}, {3, "c"}};
+
+// 方式1：按key删除
+m.erase(2);  // 删除key=2的元素，map变为{{1,"a"}, {3,"c"}}
+
+// 方式2：按迭代器删除
+auto it = m.find(1);
+if (it != m.end()) {
+    m.erase(it);  // 删除迭代器指向的元素，map变为{{3,"c"}}
+}
+
+// 方式3：删除所有元素（等价于clear()）
+m.erase(m.begin(), m.end());  // 清空map
+
+七、查找与统计
+map<int, string> m = {{1, "a"}, {2, "b"}, {3, "c"}};
+
+// 1. 查找key（find()返回迭代器）
+auto it = m.find(2);
+if (it != m.end()) {
+    cout << "找到：" << it->second << endl;  // 输出"b"
+} else {
+    cout << "未找到" << endl;
+}
+
+// 2. 统计key出现的次数（map中key唯一，返回0或1）
+int count = m.count(3);  // 存在，返回1
+cout << "key=3出现次数：" << count << endl;
+
+八、自定义排序（按 key 降序或自定义规则）
+1. 按 key 降序排列
+
+// 引入greater比较器（需包含<functional>）
+#include <functional>
+
+map<int, string, greater<int>> m;  // 第三个参数指定按key降序
+m[1] = "a";
+m[2] = "b";
+m[3] = "c";
+
+// 遍历结果：3→c, 2→b, 1→a
+for (auto& pair : m) {
+    cout << pair.first << " → " << pair.second << endl;
+}
+2. 自定义对象作为 key 并指定排序规则
+
+如果 key 是自定义类型（如 Person），需要显式定义比较规则（通过仿函数）：
+
+#include <string>
+
+// 自定义类型
+struct Person {
+    string name;
+    int age;
+};
+
+// 定义比较规则：按年龄升序（若年龄相同，按姓名升序）
+struct ComparePerson {
+    bool operator()(const Person& p1, const Person& p2) const {
+        if (p1.age != p2.age) {
+            return p1.age < p2.age;  // 年龄小的排前面
+        } else {
+            return p1.name < p2.name;  // 年龄相同则按姓名字典序
+        }
+    }
+};
+
+// 定义map，指定比较器为ComparePerson
+map<Person, string, ComparePerson> m;
+
+// 插入元素
+m[{"Alice", 25}] = "student";
+m[{"Bob", 20}] = "teacher";
+m[{"Charlie", 25}] = "doctor";
+
+// 遍历结果：按年龄升序，同年龄按姓名升序
+for (auto& pair : m) {
+    cout << pair.first.name << "(" << pair.first.age << ") → " << pair.second << endl;
+}
